@@ -21,9 +21,6 @@ HYPERPARAMS = 'hyperparams'
 FEATURES = 'features'
 OBJECTS = 'objects'
 
-
-METRICS = 'all_metrics'
-
 ALL_METRICS = [
     ACCURACY, F1,
     ROC_AUC,
@@ -42,6 +39,11 @@ ALL_Y_TRUE_Y_PRED_BASED_METRICS = [
     CONFUSION_MATRIX,
     VALUES_TRUE,
     VALUES_PRED
+]
+
+PLOT_METRICS = [
+    ACCURACY, F1,
+    ROC_AUC
 ]
 
 
@@ -85,12 +87,11 @@ class MetricsGetter:
             model,
             X,
             y,
-            cv=5#StratifiedKFold(
-            #cv=KFold(
-            #    n_splits=n_folds,
-            #    shuffle=True,
-            #    random_state=RANDOM_STATE
-            #)
+            cv=KFold(
+                n_splits=n_folds,
+                shuffle=True,
+                random_state=RANDOM_STATE
+            )
         )
         # get metrics from training set
         result = self.get_y_true_y_pred_based_metrics(y, y_pred, metrics)

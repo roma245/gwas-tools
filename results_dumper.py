@@ -15,7 +15,7 @@ from hyperopt import Trials
 
 import matplotlib.pyplot as plt
 
-from metrics_getter import METRICS, HYPERPARAMS, ROC_AUC
+from metrics_getter import HYPERPARAMS, ROC_AUC
 
 
 ###############################################################################
@@ -108,6 +108,9 @@ class ResultsDumper(object):
         if not isdir(root_folder):
             mkdir(root_folder)
         self._root_folder = root_folder
+
+    def get_root_folder(self):
+        return self._root_folder
 
     def set_subdir(self, subdir):
         """Set folder for current experiments."""
@@ -211,11 +214,11 @@ class ResultsDumper(object):
                 objects = joblib.load(filename)
                 for obj in objects:
                     for metric in metrics_dict.keys():
-                        metrics_dict[metric].append(obj[METRICS][metric])
+                        metrics_dict[metric].append(obj['full_metrics'][metric])
         # create and save plots
         for metric in metrics_dict.keys():
             plt.plot(smooth(np.array(metrics_dict[metric]), window_len))
-            plt.savefig(join(folder, "{}_plot".format(metrics)))
+            plt.savefig(join(folder, "{}_plot".format(metric)))
             plt.clf()
 
     def plot_hp_progress(self, hyperparams):
@@ -244,7 +247,7 @@ class ResultsDumper(object):
                 for obj in objects:
                     for param in params_dict.keys():
                         params_dict[param].append(obj[HYPERPARAMS][param])
-                        scores.append(obj[METRICS][ROC_AUC])
+                        scores.append(obj['full_metrics'][ROC_AUC])
         # plot hyperparameter values
         for param in params_dict.keys():
             plt = plot_cdf_in_time(params_dict[param], scores)

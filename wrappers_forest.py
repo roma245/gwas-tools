@@ -18,7 +18,7 @@ def get_rf_model(name='rf'):
 @scope.define
 def get_rf_model(*args, **kwargs):
     """Get random forest model initialized with parameters from the calling function."""
-    rf = RFWrapper(current_layer=RandomForestClassifier(*args, **kwargs))
+    rf = RFWrapper(inner_model=RandomForestClassifier(*args, **kwargs))
 
     return rf
 
@@ -32,9 +32,9 @@ class RFWrapper(AbstractModel):
         if X.shape[1] == 0:
             X = np.zeros((X.shape[0], 1), dtype=X.dtype)
         # fit scikit-lear random forest
-        self.current_layer.fit(X, y)
+        self.inner_model.fit(X, y)
 
-        self.feature_importances_ = self.current_layer.feature_importances_
+        self.feature_importances_ = self.inner_model.feature_importances_
 
         return self
 
@@ -43,7 +43,7 @@ class RFWrapper(AbstractModel):
         if X.shape[1] == 0:
             X = np.zeros((X.shape[0], 1), dtype=X.dtype)
 
-        return self.current_layer.predict(X)
+        return self.inner_model.predict(X)
 
     def transform(self, X):
         """Transform dataset X by deleting columns that correspond to less important features."""
@@ -55,7 +55,7 @@ class RFWrapper(AbstractModel):
         return X_tr
 
     def get_hyperparams(self, deep=True):
-        return self.get_params(deep)
+        return self.inner_model.get_params(deep)
 
     def get_feature_importances(self):
         return self.feature_importances_

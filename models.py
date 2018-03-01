@@ -19,10 +19,11 @@ def get_model(model_instance):
 
 
 class AbstractModel(BaseEstimator):
-    def __init__(self, current_layer=None):
-        self.current_layer = current_layer
-        self.lower_layer = None
-        self.feature_importances_ = None
+    def __init__(self, inner_model=None):
+        self.inner_model = inner_model
+
+    def get_configuration(self):
+        raise NotImplementedError()
 
     def fit(self, X, y):
         raise NotImplementedError()

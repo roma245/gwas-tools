@@ -14,7 +14,7 @@ from models import AbstractModel
 
 
 ###############################################################################
-def get_linear_model(name="line12ar_common"):
+def get_linear_model(name="logistic_regression"):
     """Set up hyperparameters and ranges for logistic regression model."""
     return scope.get_lr_model_wrapper(
         C=hp.uniform(get_full_name(name, 'C'), 0, 1),
@@ -37,7 +37,7 @@ def get_linear_model(name="line12ar_common"):
 @scope.define
 def get_lr_model_wrapper(*args, **kwargs):
     """Get logistic regression model initialized with parameters from the calling function."""
-    lr = LogisticRegressionWrapper(current_layer=LogisticRegression(*args, **kwargs))
+    lr = LogisticRegressionWrapper(inner_model=LogisticRegression(*args, **kwargs))
 
     return lr
 
@@ -51,9 +51,9 @@ class LogisticRegressionWrapper(AbstractModel):
         if self._features_count == 0:
             X = np.zeros((X.shape[0], 1), dtype=X.dtype)
         # fit scikit-lear logistic regression
-        self.current_layer.fit(X, y)
+        self.inner_model.fit(X, y)
         # get weights from fitted scikit-learn model
-        self.feature_importances_ = self.current_layer.coef_.ravel()
+        self.feature_importances_ = self.inner_model.coef_.ravel()
 
         return self
 
@@ -62,7 +62,7 @@ class LogisticRegressionWrapper(AbstractModel):
         if self._features_count == 0:
             X = np.zeros((X.shape[0], 1), dtype=X.dtype)
 
-        return self.current_layer.predict(X)
+        return self.inner_model.predict(X)
 
     def transform(self, X):
         """Transform dataset X by deleting columns that correspond to less important features."""
@@ -74,7 +74,7 @@ class LogisticRegressionWrapper(AbstractModel):
         return X_tr
 
     def get_hyperparams(self, deep=True):
-        return self.get_params(deep)
+        return self.inner_model.get_params(deep)
 
     def get_feature_importances(self):
         # model must be fitted first to return something

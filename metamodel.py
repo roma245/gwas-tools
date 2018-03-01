@@ -21,7 +21,7 @@ class MetamodelFactory(object):
         self.trials = Trials()
         self.max_evals = max_evals
 
-    def configure_params(self, model_configuration, feature_selector=None):
+    def configure_params(self, inner_model, feature_selector=None):
         """Factory method for configuration metamodel structure."""
         raise NotImplementedError()
 
@@ -37,7 +37,7 @@ class MetamodelFactory(object):
 
             # create estimator with concrete values of hyperparameters
             model_layers = list(model)
-            model = SequentialModel(name='xx', layers=model_layers)
+            model = SequentialModel(name=self.name, layers=model_layers)
 
             if not model:
                 raise ValueError, "Model can't be 'None' in objective function."
@@ -92,7 +92,7 @@ class MetamodelFactory(object):
                 max_evals=self.max_evals,
                 trials=self.trials
             )
-            print best
+            #print best
             min_loss = 1.0
             for el in self.trials.results:
                 if el['status'] == STATUS_OK:
@@ -120,6 +120,9 @@ class MetamodelFactory(object):
         """
         return self._result_model.get_support(as_indices=as_indices)
 
+    def get_hyperparams(self, deep=True):
+        return self._result_model.get_hyperparams(deep)
+
     def load_model(self, filename):
         """Read model from file."""
         pass
@@ -143,10 +146,13 @@ class SimpleFeaturesMetamodel(MetamodelFactory):
     and do nothing with features (simple features).
     """
 
-    def configure_params(self, model_configuration, feature_selector=None):
-        """Initialize space of metamodel parameters with model and do not transform initial features."""
-        #self.param_space = scope.get_model(model_configuration)
-        self.param_space = model_configuration
+    def configure_params(self, inner_model, feature_selector=None):
+        """Initialize space of metamodel parameters with model and do not transform initial features.
+
+        It is supposed that 'inner_model' parameter of class 'AbstractModel'.
+        """
+        self.name = inner_model.name
+        self.param_space = inner_model.get_configuration()
 
 
 class ComplexFeaturesMetamodel(MetamodelFactory):
@@ -154,12 +160,12 @@ class ComplexFeaturesMetamodel(MetamodelFactory):
     for transforming initial features into combinations of features (complex features).
     """
 
-    def configure_params(self, model_configuration, feature_selector=None):
+    def configure_params(self, inner_model, feature_selector=None):
         """Initialize space of metamodel parameters with model and feature selector that will
         transform initial features to something different, e.g. combinations of initial features.
         """
         self.param_space = scope.get_model_with_feature_selector(
-            inner_model=model_configuration,
+            inner_model=inner_model,
             extender_strategy=feature_selector
         )
 
