@@ -1,6 +1,6 @@
 This code is under refactoring.
 
-** Dependencies **
+### Dependencies
 
 1) boost
 2) boost-python
