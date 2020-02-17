@@ -1,4 +1,4 @@
-This code is under refactoring.
+This code is under refactoring and will be reorganized.
 
 ### Dependencies
 
@@ -18,5 +18,3 @@ This code is under refactoring.
 14) networkx
 15) hyperopt
 16) numba
-
-
